@@ -1,0 +1,267 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+
+
+class Character {
+protected:
+	std::string name;
+	double hp;
+	double maxHp;
+	double damage;
+	double armor;
+	int level;
+
+public:
+	double getHp() const {
+		return hp;
+	}
+
+	double getMaxHp() const {
+		return maxHp;
+	}
+
+	double getDamage() const {
+		return damage;
+	}
+
+	double getArmor() const {
+		return armor;
+	}
+
+	int getLevel() const {
+		return level;
+	}
+
+	std::string getName() const {
+		return name;
+	}
+
+	double takeDamage(double value) {
+		hp -= value;
+		if (hp < 0) {
+			hp = 0;
+		}
+		return hp;
+	}
+
+	virtual void makeWinSound() const {
+		std::cout << "Some sound";
+	}
+
+	virtual void makeLoseSound() const {
+		std::cout << "Some sound";
+	}
+
+	virtual ~Character() {
+
+	}
+
+	double restoreHp() {
+		hp = maxHp;
+		return hp;
+	}
+
+	double calculateDamage(double attack, double armor) const {
+		double result = attack - armor;
+		if (result < 1) result = 1;
+		return result;
+	}
+};
+
+class Player : public Character {
+private:
+	int gold=0;
+	int xp = 0;
+
+public:
+	Player& setMaxHp(const double& value) {
+		maxHp = value;
+		return *this;
+	}
+
+	Player& setName(const std::string& value) {
+		name = value;
+		return *this;
+	}
+
+	Player& setDamage(const double& value) {
+		damage = value;
+		return *this;
+	}
+
+	Player& setArmor(const double& value) {
+		armor = value;
+		return *this;
+	}
+
+	Player& setLevel(const int& value) {
+		level = value;
+		return *this;
+	}
+
+	void LevelUP() {
+		maxHp += 10;
+		damage += 2;
+		armor += 1;
+		level += 1;
+		if (hp == maxHp - 10) {
+			hp = maxHp;
+		}
+	}
+
+	void printInfo() const {
+		std::cout << "Name: " << name << std::endl;
+		std::cout << "Current hp: " << hp << std::endl;
+		std::cout << "Current level: " << level << std::endl;
+		std::cout << "Current damage: " << damage << std::endl;
+		std::cout << "Current armor: " << armor << std::endl;
+	}
+
+	void makeWinSound() const override {
+		std::cout << "Hahaha, you will never forgive my punch!\n";
+	}
+
+	void makeLoseSound() const override {
+		std::cout << "I will back, fucking demons\n";
+	}
+
+	Player& healing(const int& value) {
+		hp += value;
+		if (hp > maxHp) {
+			hp = maxHp;
+		}
+		return *this;
+	}
+
+	int addGold(int value) {
+		gold += value;
+		return gold;
+	}
+
+	int getGold() const {
+		return gold;
+	}
+
+	int addXp(int value) {
+		xp += value;
+		return xp;
+	}
+
+	int getXp() const {
+		return xp;
+	}
+};
+
+class Villain : public Character {
+private:
+	int dropGold;
+	int dropXp;
+
+public:
+
+	Villain& setMaxHp(const double& value) {
+		maxHp = value;
+		return *this;
+	}
+
+	Villain& setName(const std::string& value) {
+		name = value;
+		return *this;
+	}
+
+	Villain& setDamage(const double& value) {
+		damage = value;
+		return *this;
+	}
+
+	Villain& setArmor(const double& value) {
+		armor = value;
+		return *this;
+	}
+
+	Villain& setLevel(const int& value) {
+		level = value;
+		return *this;
+	}
+
+	Villain& setDropGold(const int& value) {
+		dropGold = value;
+		return *this;
+	}
+
+	Villain& setDropXP(const int& value) {
+		dropXp = value;
+		return *this;
+	}
+
+	int getDropGold() const {
+		return dropGold;
+	}
+
+	int getDropXp() const {
+		return dropXp;
+	}
+
+	void makeWinSound() const override {
+		std::cout << "You need to upgrade yourself, smegul\n";
+	}
+
+	void makeLoseSound() const override{
+		std::cout << "I will back from hell for you soul, smegul\n";
+	}
+};
+
+int main() {
+	int value0;
+	std::string value1;
+	std::cout << "Welcome to my game Version: 1.0" << std::endl;
+
+		Player* newPlayer = new Player();
+		std::cout << "Give a name to your Character: " << std::endl;
+		std::cin >> value1;
+		newPlayer->setName(value1).setMaxHp(100).setArmor(2).setDamage(25).setLevel(0);
+		newPlayer->restoreHp();
+
+		Villain* newVillain1 = new Villain();
+		newVillain1->setName("Lower Demon").setArmor(0).setMaxHp(50).setDamage(20).setLevel(1).setDropGold(30).setDropXP(50);
+		newVillain1->restoreHp();
+		do {
+			newPlayer->printInfo();
+			std::cout << "\nLook! There is a Lower Demon, kill him to get first gold and experince in battle" << std::endl;
+			for (int i = 0; i < 100; i++) {
+				newVillain1->takeDamage(newVillain1->calculateDamage(newPlayer->getDamage(), newVillain1->getArmor()));
+				newPlayer->takeDamage(newPlayer->calculateDamage(newVillain1->getDamage(), newPlayer->getArmor()));
+				if (newPlayer->getHp() <= 0) {
+					newPlayer->makeLoseSound();
+					newVillain1->makeWinSound();
+					break;
+				}
+				else if (newVillain1->getHp() <= 0) {
+					newPlayer->makeWinSound();
+					newVillain1->makeLoseSound();
+					newPlayer->addGold(newVillain1->getDropGold());
+					newPlayer->addXp(newVillain1->getDropXp());
+					break;
+				}
+			}
+
+			std::cout << "Want to heal?(1-yes/2-no)" << std::endl;
+			std::cin >> value0;
+			if (value0 == 1) {
+				newPlayer->restoreHp();
+			}
+			if (newPlayer->getXp() > 100) {
+				newPlayer->LevelUP();
+			}
+			std::cout << "Do you want to continue this boring shit?(1-yes/2-no)";
+			std::cin >> value0;
+		} while (value0 == 1);
+
+
+	
+	system("pause");
+		delete newPlayer;
+		delete newVillain1;
+		return 0;
+}
